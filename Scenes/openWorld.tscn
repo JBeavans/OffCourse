@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=4 uid="uid://mnacfat34w6k"]
+
+[ext_resource type="Script" uid="uid://okempli0461t" path="res://Scripts/open_world.gd" id="1_5hqt4"]
+[ext_resource type="PackedScene" uid="uid://dvxkop1wuu0p5" path="res://Scenes/player.tscn" id="1_5vkcm"]
+[ext_resource type="Texture2D" uid="uid://dw2rytyea2gn" path="res://Assets/largeFairwayTile.png" id="2_5hqt4"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ldq11"]
+texture = ExtResource("2_5hqt4")
+0:0/size_in_atlas = Vector2i(8, 8)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_2k2ja"]
+sources/1 = SubResource("TileSetAtlasSource_ldq11")
+
+[node name="OpenWorld" type="Node2D"]
+script = ExtResource("1_5hqt4")
+
+[node name="Player" parent="." instance=ExtResource("1_5vkcm")]
+position = Vector2(0, -1)
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+position = Vector2(0, 1)
+zoom = Vector2(2, 2)
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+z_index = -1
+tile_map_data = PackedByteArray("AAAEAAQAAQAAAAAAAAD8/wQAAQAAAAAAAAD8//z/AQAAAAAAAAAEAPz/AQAAAAAAAAD0//z/AQAAAAAAAAD0/wQAAQAAAAAAAAAMAAQAAQAAAAAAAAAMAPz/AQAAAAAAAADs//z/AQAAAAAAAADs/wQAAQAAAAAAAADs/wwAAQAAAAAAAAD0/wwAAQAAAAAAAAD8/wwAAQAAAAAAAAAEAAwAAQAAAAAAAAAMAAwAAQAAAAAAAAAUAAwAAQAAAAAAAAAUAAQAAQAAAAAAAAAUAPz/AQAAAAAAAAAUAPT/AQAAAAAAAAAMAPT/AQAAAAAAAAAEAPT/AQAAAAAAAAD8//T/AQAAAAAAAAA=")
+tile_set = SubResource("TileSet_2k2ja")
+
+[connection signal="ballPicked" from="Player" to="." method="remove_ball"]
+[connection signal="ballPlaced" from="Player" to="." method="spawn_ball"]
+[connection signal="swingTriggered" from="Player" to="." method="_on_player_swing_triggered"]

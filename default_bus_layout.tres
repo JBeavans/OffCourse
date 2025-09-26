@@ -1,0 +1,13 @@
+[gd_resource type="AudioBusLayout" load_steps=3 format=3 uid="uid://nxnxlnvcr5q5"]
+
+[sub_resource type="AudioEffectPitchShift" id="AudioEffectPitchShift_j3pel"]
+resource_name = "PitchShift"
+
+[sub_resource type="AudioEffectAmplify" id="AudioEffectAmplify_j3pel"]
+resource_name = "Amplify"
+
+[resource]
+bus/0/effect/0/effect = SubResource("AudioEffectPitchShift_j3pel")
+bus/0/effect/0/enabled = false
+bus/0/effect/1/effect = SubResource("AudioEffectAmplify_j3pel")
+bus/0/effect/1/enabled = false

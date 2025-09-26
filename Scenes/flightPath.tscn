@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://dj3ripwmiedhv"]
+
+[ext_resource type="Script" uid="uid://cy8t1ouyfucpu" path="res://Scripts/flight_path.gd" id="1_enxds"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_ans5y"]
+specular_color = Color(0.26, 0.26, 0.26, 1)
+
+[node name="FlightPath" type="Node2D"]
+script = ExtResource("1_enxds")
+
+[node name="FlightPathBackground" type="Sprite2D" parent="."]
+modulate = Color(0.17, 0.17, 0.17, 1)
+position = Vector2(209, -120)
+scale = Vector2(311, 187)
+texture = SubResource("CanvasTexture_ans5y")

@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://c1udllsev3obr"]
+
+[ext_resource type="Script" uid="uid://bdd1nnb83lkgi" path="res://Scripts/club.gd" id="1_ge55m"]
+[ext_resource type="Texture2D" uid="uid://bej5i02dffjgr" path="res://Assets/5-iron.png" id="1_q5urh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ge55m"]
+size = Vector2(12, 60)
+
+[node name="club" type="CharacterBody2D"]
+script = ExtResource("1_ge55m")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_q5urh")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-15, -102)
+shape = SubResource("RectangleShape2D_ge55m")

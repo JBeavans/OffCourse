@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://d0r3klfumb3u1"]
+
+[ext_resource type="Script" uid="uid://1wwtj8ogq4nu" path="res://Scripts/swing_view.gd" id="1_tf04c"]
+[ext_resource type="PackedScene" uid="uid://dqo5u0gbnoofh" path="res://Scenes/swingView_Ball.tscn" id="1_u5wju"]
+[ext_resource type="PackedScene" uid="uid://c1udllsev3obr" path="res://Scenes/club.tscn" id="2_tf04c"]
+[ext_resource type="Script" uid="uid://ysy2u03pgs6c" path="res://Scripts/velocity_label.gd" id="3_pd6ls"]
+[ext_resource type="Script" uid="uid://bxb110emo7q4t" path="res://Scenes/swing_sound.gd" id="4_785v6"]
+
+[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_pd6ls"]
+mix_rate = 12738.0
+buffer_length = 0.2
+
+[node name="swingView" type="Node2D"]
+script = ExtResource("1_tf04c")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(2, 2)
+
+[node name="club" parent="." instance=ExtResource("2_tf04c")]
+position = Vector2(23, 2)
+
+[node name="ball" parent="." instance=ExtResource("1_u5wju")]
+position = Vector2(-24, -99)
+
+[node name="swingSound" type="AudioStreamPlayer2D" parent="."]
+stream = SubResource("AudioStreamGenerator_pd6ls")
+playback_type = 1
+script = ExtResource("4_785v6")
+
+[node name="velocityLabel" type="Label" parent="."]
+offset_left = -109.0
+offset_top = -21.0
+offset_right = -40.0
+offset_bottom = 12.0
+script = ExtResource("3_pd6ls")
+metadata/_edit_use_anchors_ = true
+
+[connection signal="accChanged" from="club" to="swingSound" method="_on_club_acc_changed"]
+[connection signal="ballStruck" from="club" to="." method="_on_club_ball_struck"]
+[connection signal="ballStruck" from="club" to="ball" method="_on_club_ball_struck"]
+[connection signal="swingToggled" from="club" to="swingSound" method="_on_club_swing_toggled"]

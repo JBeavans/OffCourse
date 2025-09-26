@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://dqo5u0gbnoofh"]
+
+[ext_resource type="Texture2D" uid="uid://c4trql4v1vam5" path="res://Assets/range-ball.png" id="1_d60mj"]
+[ext_resource type="Script" uid="uid://b4vybjxlesjfr" path="res://Scripts/swingView_Ball.gd" id="1_ij5cq"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_d60mj"]
+friction = 0.33
+bounce = 0.68
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ij5cq"]
+radius = 23.0217
+
+[node name="SwingViewBall" type="RigidBody2D"]
+mass = 0.044
+physics_material_override = SubResource("PhysicsMaterial_d60mj")
+gravity_scale = 0.0
+contact_monitor = true
+max_contacts_reported = 1
+script = ExtResource("1_ij5cq")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_d60mj")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ij5cq")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+position = Vector2(8.9407e-07, 7.15256e-07)
+scale = Vector2(2.4, 2.4)
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]
