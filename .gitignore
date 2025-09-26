@@ -18,3 +18,7 @@ mono_crash.*.json
 =======
 /android/
 >>>>>>> 431b2ef (Initial commit. Contains all the work I've completed locally so far. Only tested locally without creating a build.)
+
+# VSC configs
+.vscode*
+
