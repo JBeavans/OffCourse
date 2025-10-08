@@ -17,11 +17,22 @@ func _process(delta: float) -> void:
 	pass
 
 #creates a ball at the given position with optional velocity
-func spawn_ball(pos: Vector2, vel: Vector2 = Vector2.ZERO, id: int = 0) -> void:
+#TODO: update inputs to differentiate between projected resting point and speed
+# - a new ball's projected resting point = spawn point
+# - a new ball's speed = 0
+# - an existing ball should pull speed and projected resting point from data
+func spawn_ball(pos: Vector2, dir2D: Vector2 = Vector2.ZERO, id: int = 0) -> void:
 	print("spawn_ball signal received")
 	var ball = ball_scene.instantiate()
 	ball.position = pos
-	ball.velocity = vel
+		
+	if not dir2D == Vector2.ZERO: #this leaves an edge case of the the calculated new position of the ball being (0,0)
+		ball.hasVelocity = true
+		var launchConditions = _data.ballsDict[id].launchConditions
+		ball.speed = -launchConditions.x * cos(deg_to_rad(launchConditions.y))
+	ball.dir2D = dir2D #follow up with correct assignment
+	 
+	
 	#check if this is a new ball (does not have an ID yet)
 	if id == 0:
 		#assign an ID based on how many balls already exist
@@ -33,14 +44,27 @@ func spawn_ball(pos: Vector2, vel: Vector2 = Vector2.ZERO, id: int = 0) -> void:
 		var newBallData = BallData.new()
 		newBallData.ballID = ball.id
 		newBallData.pos = pos
-		newBallData.dir2D = vel
+		newBallData.dir2D = dir2D
 		#add the ballData to the list of known balls
 		_data.balls.append(newBallData)
 		_data.ballsDict[ball.id] = newBallData
 		_data.playerData.balls.append(ball.id)
 	else:
 		ball.id = id
+		#check if the ball just launched
+		if _data.ballsDict[id].launchConditions:
+			var flight_path = flight_path_scene.instantiate()
+			flight_path.setup(_data.ballsDict[id].launchConditions)
+			#reset launch conditions of given ball to zero so the node is only added once
+			_data.ballsDict[id].launchConditions = Vector2.ZERO
+			_data.ballsDict[id].flightPath = flight_path
+			var flight_time = flight_path.getFlightTime()
+			print("flight time: " + str(flight_time))
+			#hacky way to set the speed so that the ball stops when the flight stops
+			ball.speed = abs(flight_path.getXVel()) / flight_time
+			$Player.add_child(flight_path)
 	add_child(ball)
+	#connect the ballMoved signal and ensure that the ball's id is emitted as part of this object's signal payload
 	ball.ballMoved.connect(_on_ballMoved.bind(ball.id))
 	ball.ballStopped.connect(_on_ballStopped)
 
@@ -99,12 +123,15 @@ func _populateScene() -> void:
 
 
 func _on_player_swing_triggered(id: int) -> void:
-	_data.playerData.pos = $Player.position
-	_data.playerData.dir = $Player.idleDirection
-	_data.activeBallID = id
-	print("Player at: " + str(_data.playerData.pos) + " facing: " + str(_data.playerData.dir) + " activeBall:" + str(_data.activeBallID))
-	stateSaved.emit(_data)
-	sceneChanged.emit(swing_scene)
+	#stop player from swinging if they aren't facing their ball or if another ball is still in motion.
+	#TODO: update check so that changing views is only dependent on if another ball is in motion
+	if (_data.activeBallID == 0):
+		_data.playerData.pos = $Player.position
+		_data.playerData.dir = $Player.idleDirection
+		_data.activeBallID = id
+		print("Player at: " + str(_data.playerData.pos) + " facing: " + str(_data.playerData.dir) + " activeBall:" + str(_data.activeBallID))
+		stateSaved.emit(_data)
+		sceneChanged.emit(swing_scene)
 
 
 func printPlayersBalls() -> void:
@@ -126,28 +153,23 @@ func printBalls() -> void:
 	print()
 
 func _on_ballMoved(pos: Vector2, dir: Vector2, id: int) -> void:
+	if !(dir == Vector2.ZERO):
+		_data.activeBallID = id
 	var i := 0
 	for ball in _data.balls:
 		if ball.ballID == id:
 			_data.balls[i].pos = pos
 			_data.balls[i].dir2D = dir
+			break;
 		i += 1
 	#dictionary method (possibly... may need to create a BalLData var and pass it back)
 	_data.ballsDict[id].pos = pos
 	_data.ballsDict[id].dir2D = dir
 	
-	if _data.ballsDict[id].launchConditions:
-		#var ballData = _data.ballsDict[id]
-		#var launchV = ballData.laun
-		var flight_path = flight_path_scene.instantiate()
-		flight_path.setup(_data.ballsDict[id].launchConditions)
-		#reset launch conditions of given ball to zero so the node is only added once
-		_data.ballsDict[id].launchConditions = Vector2.ZERO
-		_data.ballsDict[id].flightPath = flight_path
-		var flight_time = flight_path.getFlightTime()
-		print("flight time: " + str(flight_time))
-		$Player.add_child(flight_path)
-		
-	
 func _on_ballStopped() -> void:
+	_data.activeBallID = 0
 	$Player.get_child(-1).queue_free()
+	print("ball stopped")
+
+func _on_player_print_data() -> void:
+	print("Active Ball:" + str(_data.activeBallID))

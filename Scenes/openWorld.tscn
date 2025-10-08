@@ -29,4 +29,5 @@ tile_set = SubResource("TileSet_2k2ja")
 
 [connection signal="ballPicked" from="Player" to="." method="remove_ball"]
 [connection signal="ballPlaced" from="Player" to="." method="spawn_ball"]
+[connection signal="printData" from="Player" to="." method="_on_player_print_data"]
 [connection signal="swingTriggered" from="Player" to="." method="_on_player_swing_triggered"]

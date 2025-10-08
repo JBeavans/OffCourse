@@ -3,6 +3,7 @@ extends CharacterBody2D
 signal ballPlaced
 signal swingTriggered
 signal ballPicked
+signal printData
 
 const SPEED = 50.0
 var ballCount = 5
@@ -32,6 +33,9 @@ func _process(delta: float) -> void:
 				pick_up_ball(id)
 			else:
 				place_ball()
+				
+		if Input.is_action_just_pressed("list"):
+			printData.emit()
 		
 
 

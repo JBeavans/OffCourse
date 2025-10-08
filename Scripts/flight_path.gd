@@ -12,6 +12,7 @@ var pointScene: PackedScene = load("res://Scenes/point.tscn")
 var pathOrigin: Vector2
 var timeScale: float
 var heightScale: float
+var _timeReportNeeded: bool = false
 
 @onready var graphBackground: Sprite2D = $FlightPathBackground
 
@@ -22,7 +23,7 @@ func setup(launchConditions: Vector2) -> void:
 	_launchAngle = deg_to_rad(launchConditions.y)
 	_yVel = -_launchVel * sin(_launchAngle)
 	_xVel = _launchVel * cos(_launchAngle)
-	_flightTime = 2 * sqrt(2 * _yVel / GRAVITY) # 2 * time to peak of flight [Vy = 0]
+	_flightTime = 2 * _yVel / GRAVITY # 2 * time to peak of flight [Vy = 0]
 	print("flight time: " + str(_flightTime))
 
 # Called when the node enters the scene tree for the first time.
@@ -40,11 +41,17 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_simTime += delta
 	var y = calculateBallHeight()
+	#currently only checking if ball has not struck the ground again, but eventually need to calculate a second bounce or roll and base it on x velocity
 	if y >= 0:
 		var point = pointScene.instantiate()
 		point.position = Vector2(pathOrigin.x - _simTime * timeScale, -1 * y * heightScale + pathOrigin.y)
-		print("point" + str(point.position))
+		#print("point" + str(point.position))
 		add_child(point)
+		_timeReportNeeded = true
+	elif (_timeReportNeeded):
+		print("simTime: " + str(_simTime))
+		print("flightTime: " + str(_flightTime))
+		_timeReportNeeded = false
 
 func calculateBallHeight() -> float:
 	var y = _yVel*_simTime - (GRAVITY*_simTime*_simTime)/2

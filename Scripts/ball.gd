@@ -4,11 +4,11 @@ extends RigidBody2D
 signal ballMoved
 signal ballStopped
 
-const SPEED = 12.5
-
-var velocity: Vector2 #actually new position based on velocity
+#const SPEED = 12.5
+var hasVelocity: bool = false
+var dir2D: Vector2 # new position based on launch velocity
 var id: int
-
+var speed: int = 0
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	add_to_group("balls")
@@ -16,12 +16,13 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if not velocity == Vector2.ZERO:
+	if hasVelocity:
 		var prev_pos:= position
 		#move_and_collide(velocity * delta)
-		position = position.move_toward(velocity, delta * SPEED)
+		position = position.move_toward(dir2D, delta * speed)
 		if prev_pos == position:
-			velocity = Vector2.ZERO
+			hasVelocity = false
+			dir2D = Vector2.ZERO
 			ballStopped.emit()
 			
-		ballMoved.emit(position, velocity)
+		ballMoved.emit(position, dir2D)

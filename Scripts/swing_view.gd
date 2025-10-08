@@ -18,6 +18,8 @@ func _ready() -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if Input.is_action_just_released("look_down", false):
+		#make sure activeBallID is reset if the player does not hit the balld
+		_data.activeBallID = 0
 		var nextScene: PackedScene = load(openWorldScene)
 		#signal exit to SceneManager
 		stateSaved.emit(_data)
@@ -34,9 +36,11 @@ func _process(delta: float) -> void:
 
 func _on_club_ball_struck(launchConditions: Vector2) -> void:
 	var launchVel = launchConditions.x
+	var launchAngle = deg_to_rad(launchConditions.y)
 	#calculate openWorld ball velocity
-	#add variables to change velocity and rotation based on ballType
-	var ballVelocity: Vector2 = abs(launchVel) * _data.playerData.dir.orthogonal()
+	var launchVel2D = launchVel * cos(launchAngle)
+	#TODO: add variables to change velocity and rotation based on ballType
+	var ballVelocity: Vector2 = abs(launchVel2D) * _data.playerData.dir.orthogonal()
 	var activeBall = _data.activeBallID
 	#set dictionary data for ball velocity... which is actually just the balls projected landing point
 	print("active ball: " + str(_data.activeBallID ))
@@ -48,7 +52,7 @@ func _on_club_ball_struck(launchConditions: Vector2) -> void:
 			#set array data for ball velocity (actually just the projected landing point)
 			_data.balls[i].dir2D = ballVelocity + _data.balls[i].pos #there has to be a better way
 			_data.balls[i].launchConditions = launchConditions
-			#set active ball back to 0 before returning (this will make it easier to check if another player is swinging
+			#set active ball back to 0 before returning (this will make it easier to check if another player is swinging)
 			_data.activeBallID = 0
 			return
 		i += 1
