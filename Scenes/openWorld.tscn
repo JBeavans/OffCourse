@@ -1,8 +1,10 @@
-[gd_scene load_steps=6 format=4 uid="uid://mnacfat34w6k"]
+[gd_scene load_steps=13 format=4 uid="uid://mnacfat34w6k"]
 
 [ext_resource type="Script" uid="uid://okempli0461t" path="res://Scripts/open_world.gd" id="1_5hqt4"]
 [ext_resource type="PackedScene" uid="uid://dvxkop1wuu0p5" path="res://Scenes/player.tscn" id="1_5vkcm"]
 [ext_resource type="Texture2D" uid="uid://dw2rytyea2gn" path="res://Assets/largeFairwayTile.png" id="2_5hqt4"]
+[ext_resource type="Script" uid="uid://dlg8saxr5bto4" path="res://Scripts/tee_box.gd" id="4_c1366"]
+[ext_resource type="Script" uid="uid://ckfgemgp35j8n" path="res://Scripts/tee.gd" id="5_3o21l"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ldq11"]
 texture = ExtResource("2_5hqt4")
@@ -12,14 +14,26 @@ texture = ExtResource("2_5hqt4")
 [sub_resource type="TileSet" id="TileSet_2k2ja"]
 sources/1 = SubResource("TileSetAtlasSource_ldq11")
 
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_5vkcm"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5vkcm"]
+size = Vector2(48, 40)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_5hqt4"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_5vkcm"]
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_5hqt4"]
+b = Vector2(0, -2)
+
 [node name="OpenWorld" type="Node2D"]
 script = ExtResource("1_5hqt4")
 
 [node name="Player" parent="." instance=ExtResource("1_5vkcm")]
-position = Vector2(0, -1)
+z_index = 1
+position = Vector2(-12, 196)
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
-position = Vector2(0, 1)
 zoom = Vector2(2, 2)
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
@@ -27,7 +41,49 @@ z_index = -1
 tile_map_data = PackedByteArray("AAAEAAQAAQAAAAAAAAD8/wQAAQAAAAAAAAD8//z/AQAAAAAAAAAEAPz/AQAAAAAAAAD0//z/AQAAAAAAAAD0/wQAAQAAAAAAAAAMAAQAAQAAAAAAAAAMAPz/AQAAAAAAAADs//z/AQAAAAAAAADs/wQAAQAAAAAAAADs/wwAAQAAAAAAAAD0/wwAAQAAAAAAAAD8/wwAAQAAAAAAAAAEAAwAAQAAAAAAAAAMAAwAAQAAAAAAAAAUAAwAAQAAAAAAAAAUAAQAAQAAAAAAAAAUAPz/AQAAAAAAAAAUAPT/AQAAAAAAAAAMAPT/AQAAAAAAAAAEAPT/AQAAAAAAAAD8//T/AQAAAAAAAAA=")
 tile_set = SubResource("TileSet_2k2ja")
 
+[node name="TeeBox" type="StaticBody2D" parent="."]
+position = Vector2(0, 128)
+script = ExtResource("4_c1366")
+
+[node name="TeeBoxSprite" type="Sprite2D" parent="TeeBox"]
+scale = Vector2(56, 56)
+texture = SubResource("PlaceholderTexture2D_5vkcm")
+
+[node name="TeeBoxWallsCollisionBody" type="CollisionPolygon2D" parent="TeeBox"]
+polygon = PackedVector2Array(-24, 28, -28, 28, -28, -28, 28, -28, 28, 28, 24, 28, 24, -24, -24, -24)
+
+[node name="TeeBoxArea" type="Area2D" parent="TeeBox"]
+collision_mask = 3
+
+[node name="TeeBoxInternalCollisionBody" type="CollisionShape2D" parent="TeeBox/TeeBoxArea"]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_5vkcm")
+
+[node name="Tee" type="Node2D" parent="TeeBox"]
+script = ExtResource("5_3o21l")
+
+[node name="TeeSprite" type="Sprite2D" parent="TeeBox/Tee"]
+scale = Vector2(0.5, 1.5)
+texture = SubResource("CanvasTexture_5hqt4")
+
+[node name="FlagStick" type="StaticBody2D" parent="."]
+position = Vector2(0, -191)
+
+[node name="FlagStickSprite" type="Sprite2D" parent="FlagStick"]
+position = Vector2(0, -17)
+scale = Vector2(1, 33)
+texture = SubResource("CanvasTexture_5vkcm")
+
+[node name="FlagStickCollisionBody" type="CollisionShape2D" parent="FlagStick"]
+scale = Vector2(0.25, 1)
+shape = SubResource("SegmentShape2D_5hqt4")
+
 [connection signal="ballPicked" from="Player" to="." method="remove_ball"]
 [connection signal="ballPlaced" from="Player" to="." method="spawn_ball"]
 [connection signal="printData" from="Player" to="." method="_on_player_print_data"]
+[connection signal="requestTeePosition" from="Player" to="TeeBox" method="_on_player_request_tee_position"]
 [connection signal="swingTriggered" from="Player" to="." method="_on_player_swing_triggered"]
+[connection signal="sendTeePosition" from="TeeBox" to="Player" method="_on_tee_box_send_tee_position"]
+[connection signal="body_entered" from="TeeBox/TeeBoxArea" to="Player" method="_on_tee_box_area_body_entered"]
+[connection signal="body_exited" from="TeeBox/TeeBoxArea" to="Player" method="_on_tee_box_area_body_exited"]
+[connection signal="teePlaced" from="TeeBox/Tee" to="TeeBox" method="_on_tee_tee_placed"]

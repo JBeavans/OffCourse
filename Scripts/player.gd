@@ -4,35 +4,46 @@ signal ballPlaced
 signal swingTriggered
 signal ballPicked
 signal printData
+signal requestTeePosition
 
 const SPEED = 50.0
 var ballCount = 5
 var idleDirection: Vector2 #(0,1) #default idle to look down
 var _spriteSize: Vector2
 var _offsetToFeet: int
+var _isInTeeBox: bool = false
+var _ballOnTee: int = 0
+var _isTee: bool
+var _teePosition: Vector2
+
 
 @onready var char_animation: AnimatedSprite2D = $AnimatedSprite2D
 @onready var ray_cast: RayCast2D = $RayCast
 
 func _ready() -> void:
 	_spriteSize = $CollisionShape2D.shape.get_rect().size
-	_offsetToFeet = _spriteSize.y / 2
-	
+	_offsetToFeet = _spriteSize.y #/ 2 - commented out since the collision shape was changed to occupy only the space below the player's waist	
 	
 func _process(delta: float) -> void:
 	if isStationary():
 		if Input.is_action_just_pressed("look_down", false):
 			#update player data
 			#signal to OpenWorld that player wants to swing
-			swingTriggered.emit(is_facing_ball())
+			swingTriggered.emit(isFacingBall())
 			#get_tree().change_scene_to_file("res://Scenes/swingView.tscn")
 			
 		if Input.is_action_just_pressed("interact_ball"):
-			var id = is_facing_ball()
-			if id:
+			var id = isFacingBall()
+			if isInTeeBox():
+				toggle_ball_on_tee()
+			elif id:
 				pick_up_ball(id)
 			else:
-				place_ball()
+				#decide where the ball will go. *update to include a random "drop zone"*
+				var ballPosition = position + (idleDirection * 3)
+				ballPosition.y += _offsetToFeet + 3 #shifting the ball down a smidge (TODO: factor in this adjustment in the calculation of the offset variable)
+				ballPosition.x += idleDirection.x * _spriteSize.x
+				place_ball(ballPosition)
 				
 		if Input.is_action_just_pressed("list"):
 			printData.emit()
@@ -77,13 +88,9 @@ func _physics_process(delta: float) -> void:
 	
 	move_and_slide()
 
-func place_ball():
+func place_ball(ballPosition: Vector2):
 	#check if player has a ball
 	if ballCount > 0:
-		#decide where the ball will go. *update to include a random "drop zone"*
-		var ballPosition = position + (idleDirection * 3)
-		ballPosition.y += _offsetToFeet
-		ballPosition.x += idleDirection.x * _spriteSize.x
 		#send a signal to OpenWorld parent to create a new ball
 		ballPlaced.emit(ballPosition)
 		#update how many balls the player has
@@ -103,11 +110,11 @@ func pick_up_ball(id: int) -> void:
 func isStationary():
 	return velocity == Vector2.ZERO
 	
-func is_facing_ball() -> int:
+func isFacingBall() -> int:
 	#temp return until methodology is determined
 	#returns id of nearest ball within searchable range (based on direction and player's stats)
 	var obj = ray_cast.get_collider()
-	print(obj)
+	print("is facing " + str(obj))
 	if obj is FindableArea:
 		return obj.get_parent().id
 	return 0 
@@ -117,3 +124,49 @@ func setDirection(dir: Vector2) -> void:
 
 func setBallCount(numBallsInPlay: int) -> void:
 	ballCount -= numBallsInPlay
+	
+func isInTeeBox() -> bool:
+	return _isInTeeBox
+	
+func getBallOnTee() -> int:
+	return _ballOnTee
+	
+func toggle_ball_on_tee():
+	var id = getBallOnTee()
+	if id:
+		pick_up_ball(id)
+	else:
+		place_ball(_teePosition + Vector2(0, -0.75))
+		
+
+
+func _on_tee_box_area_body_entered(body: Node2D) -> void:
+	if body == self:
+		_isInTeeBox = true
+		print("You entered tee box\n")
+		requestTeePosition.emit() #likely will need to send playerID once multiplayer is in development
+		#TODO: add a mechanic to move pan the camera up to give the player a better view of the where they're aiming
+	elif body.is_in_group("balls"):
+		_ballOnTee = body.id
+		print("ball id: " + str(_ballOnTee) + " on tee")
+	else:
+		print(body.name + " entered tee box")
+
+
+func _on_tee_box_area_body_exited(body: Node2D) -> void:
+	if body == self:
+		_isInTeeBox = false
+		print("You exited the tee box\n")
+		#TODO: complete the camera moving mechanic by moving it back to its original position relative to the player
+	elif body.is_in_group("balls"):
+		_ballOnTee = 0
+
+
+func _on_tee_box_send_tee_position(pos: Vector2) -> void:
+	print("Tee Position: " + str(pos))
+	if not pos == null:
+		_isTee = true
+	else:
+		_isTee = false
+		
+	_teePosition = pos

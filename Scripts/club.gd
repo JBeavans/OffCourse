@@ -8,8 +8,9 @@ signal swingToggled
 
 @onready var swing_sound: AudioStreamPlayer2D = $"../swingSound"
 
+const PIX_PER_YD: float = 3.0
 const SPEED_SCALE = 0.02
-const MAX_V = 180
+const MAX_V = 120.0 # "yds/s"
 var x0: float
 var velX0:= 0.0
 #var zVel: float
@@ -41,7 +42,7 @@ func _physics_process(delta: float) -> void:
 		#currently it functions, but likely not how I expect since the math doesn't make sense to me
 		var stepSize = a % 100
 		if stepSize > 10:
-			print(stepSize)
+			print("stepSize: " + str(stepSize))
 			accChanged.emit(int(a))
 		
 		velocity_label.text = "V0: "+ str(velX0) + "\nV1: " + str(velX1) + "\nA: " + str(a)
@@ -58,12 +59,12 @@ func _physics_process(delta: float) -> void:
 		velocity.x = velX1 # dx * SPEED * delta
 		var collision = move_and_collide(velocity)
 		if (collision): 
-			print(collision.get_collider())
+			print("club collided with " + collision.get_collider().name)
 			#TODO: create a formula that updates based on club attributes
-			var launchVelocity = max(velocity.x * 1.5, -MAX_V)
+			var launchVelocity = max(velocity.x, -MAX_V)
 			
 			#send the launchConditions
-			ballStruck.emit(Vector2(launchVelocity, launchAngle))
+			ballStruck.emit(Vector2(launchVelocity * PIX_PER_YD, launchAngle))
 	
 	#reset the club when the user releases the LMB and stop the swing sound
 	elif Input.is_action_just_released("swing"):

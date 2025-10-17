@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dqo5u0gbnoofh" path="res://Scenes/swingView_Ball.tscn" id="1_u5wju"]
 [ext_resource type="PackedScene" uid="uid://c1udllsev3obr" path="res://Scenes/club.tscn" id="2_tf04c"]
 [ext_resource type="Script" uid="uid://ysy2u03pgs6c" path="res://Scripts/velocity_label.gd" id="3_pd6ls"]
-[ext_resource type="Script" uid="uid://bxb110emo7q4t" path="res://Scenes/swing_sound.gd" id="4_785v6"]
+[ext_resource type="Script" uid="uid://bxb110emo7q4t" path="res://Scripts/swing_sound.gd" id="4_785v6"]
 
 [sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_pd6ls"]
 mix_rate = 12738.0

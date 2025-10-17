@@ -33,8 +33,8 @@ func _ready() -> void:
 	print("graph position: " + str(graphBackground.position))
 	pathOrigin.x = graphBackground.position.x + graphBackground.scale.x / 2
 	pathOrigin.y = graphBackground.position.y + graphBackground.scale.y / 2
-	timeScale = graphBackground.scale.x / 15.0
-	heightScale = graphBackground.scale.y / 200.0
+	timeScale = graphBackground.scale.x / 40.0
+	heightScale = graphBackground.scale.y / 1000.0
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
