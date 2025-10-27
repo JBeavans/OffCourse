@@ -4,6 +4,7 @@ var ball_scene: PackedScene = load("res://Scenes/ball.tscn")
 var player_scene: PackedScene = load("res://Scenes/player.tscn")
 var swing_scene: PackedScene = load("res://Scenes/swingView.tscn")
 var flight_path_scene: PackedScene = load("res://Scenes/flightPath.tscn")
+var bag_scene: PackedScene = load("res://Scenes/bag.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -117,7 +118,12 @@ func _populateScene() -> void:
 		#spawn_player(_data.playerData.pos, _data.playerData.dir)
 		$Player.position = _data.playerData.pos
 		$Player.setDirection(_data.playerData.dir)
-		$Player.setBallCount(_data.playerData.balls.size())
+		$Player.setBallCount(_data.playerData.ballsInBag)
+		$Player/Camera2D.set_offset(_data.playerData.cameraOffset)
+		if (_data.playerData.cameraOffset != Vector2.ZERO):
+			spawnBag(_data.playerData.bagLocation)
+			$Player._bagEquiped = false
+			print("open world loaded bag")
 	else:
 		print("No Player Data!")
 
@@ -128,6 +134,7 @@ func _on_player_swing_triggered(id: int) -> void:
 	if (_data.activeBallID == 0):
 		_data.playerData.pos = $Player.position
 		_data.playerData.dir = $Player.idleDirection
+		_data.playerData.ballsInBag = $Player._ballCount #test to see if I can access what I thought was a private variable
 		_data.activeBallID = id
 		print("Player at: " + str(_data.playerData.pos) + " facing: " + str(_data.playerData.dir) + " activeBall:" + str(_data.activeBallID))
 		stateSaved.emit(_data)
@@ -173,3 +180,34 @@ func _on_ballStopped() -> void:
 
 func _on_player_print_data() -> void:
 	print("Active Ball:" + str(_data.activeBallID))
+
+
+func _on_range_picker_collection_area_body_entered(body: Node2D) -> void:
+	if body.is_in_group("balls"):
+		var pickedBall: Ball = body
+		if pickedBall.hasVelocity:
+			_on_ballStopped()
+		remove_ball(pickedBall.id)
+		
+func spawnBag(pos: Vector2):
+	var bag = bag_scene.instantiate()
+	bag.position = pos
+	bag.bagInteractorEntered.connect(_on_bag_interact_enter) #NOT CONNECTED CORRECTLY
+	bag.bagInteractorExited.connect(_on_bag_interact_exit)
+	_data.playerData.bagLocation = pos
+	add_child(bag)
+	
+func removeBag(bag: Node):
+	bag.queue_free()
+
+func _on_bag_interact_enter(body: Node2D, bag: Node2D):
+	print("passing bag interact ENTER signal from OW to player")
+	$Player._on_bag_interact_entered(body, bag)
+
+func _on_bag_interact_exit(body: Node2D):
+	print("passing bag interact EXIT signal from OW to player")
+	$Player._on_bag_interact_exited(body)
+
+
+func _on_player_camera_adjusted(newOffset: Vector2) -> void:
+	_data.playerData.cameraOffset = newOffset

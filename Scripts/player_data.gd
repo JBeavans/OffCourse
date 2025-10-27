@@ -3,7 +3,10 @@ class_name PlayerData extends Node
 var playerName: String
 var pos: Vector2
 var dir: Vector2
+var ballsInBag: int
 var balls: Array[int] #should contain a list of ballIDs belonging to the player
+var bagLocation: Vector2
+var cameraOffset: Vector2
 
 func _init() -> void:
 	balls = []

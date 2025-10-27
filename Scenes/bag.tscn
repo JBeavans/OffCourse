@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://clqfw1kddm1yv"]
+
+[ext_resource type="Script" uid="uid://cjlpy3op6sk0t" path="res://Scripts/bag.gd" id="1_5tw1m"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_sa1mx"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kj8lm"]
+size = Vector2(4, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8p4o5"]
+size = Vector2(16, 24)
+
+[node name="Bag" type="StaticBody2D"]
+script = ExtResource("1_5tw1m")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(-4.47035e-08, 8)
+scale = Vector2(4.5, 15.75)
+texture = SubResource("PlaceholderTexture2D_sa1mx")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 8)
+shape = SubResource("RectangleShape2D_kj8lm")
+
+[node name="BagInteractorArea" type="Area2D" parent="."]
+
+[node name="BagInteractorCollisionShape" type="CollisionShape2D" parent="BagInteractorArea"]
+position = Vector2(0, 8)
+shape = SubResource("RectangleShape2D_8p4o5")
+
+[connection signal="body_entered" from="BagInteractorArea" to="." method="_on_bag_interactor_area_body_entered"]
+[connection signal="body_exited" from="BagInteractorArea" to="." method="_on_bag_interactor_area_body_exited"]

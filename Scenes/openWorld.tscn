@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=4 uid="uid://mnacfat34w6k"]
+[gd_scene load_steps=22 format=4 uid="uid://mnacfat34w6k"]
 
 [ext_resource type="Script" uid="uid://okempli0461t" path="res://Scripts/open_world.gd" id="1_5hqt4"]
 [ext_resource type="PackedScene" uid="uid://dvxkop1wuu0p5" path="res://Scenes/player.tscn" id="1_5vkcm"]
 [ext_resource type="Texture2D" uid="uid://dw2rytyea2gn" path="res://Assets/largeFairwayTile.png" id="2_5hqt4"]
 [ext_resource type="Script" uid="uid://dlg8saxr5bto4" path="res://Scripts/tee_box.gd" id="4_c1366"]
 [ext_resource type="Script" uid="uid://ckfgemgp35j8n" path="res://Scripts/tee.gd" id="5_3o21l"]
+[ext_resource type="Script" uid="uid://bfnak5kv58l0" path="res://Scripts/range_picker.gd" id="6_3o21l"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ldq11"]
 texture = ExtResource("2_5hqt4")
@@ -25,6 +26,81 @@ size = Vector2(48, 40)
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_5hqt4"]
 b = Vector2(0, -2)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_c1366"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3o21l"]
+size = Vector2(25, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c1366"]
+size = Vector2(24, 8)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_3o21l"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sa1mx"]
+size = Vector2(26, 16)
+
+[sub_resource type="Animation" id="Animation_sa1mx"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-192, -208)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [1.5708]
+}
+
+[sub_resource type="Animation" id="Animation_3o21l"]
+resource_name = "basicRangePath"
+length = 22.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 8, 9.5, 11, 19, 20.4667, 22),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(-220, -208), Vector2(364, -208), Vector2(384, -188), Vector2(364, -168), Vector2(-220, -168), Vector2(-240, -188), Vector2(-220, -208)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 8, 9.5, 11, 19, 20.4667, 22),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.0, 1.5708, 3.14159, 3.14159, 4.71239, 6.28319]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_kj8lm"]
+_data = {
+&"RESET": SubResource("Animation_sa1mx"),
+&"basicRangePath": SubResource("Animation_3o21l")
+}
 
 [node name="OpenWorld" type="Node2D"]
 script = ExtResource("1_5hqt4")
@@ -78,8 +154,58 @@ texture = SubResource("CanvasTexture_5vkcm")
 scale = Vector2(0.25, 1)
 shape = SubResource("SegmentShape2D_5hqt4")
 
+[node name="BallVendor" type="StaticBody2D" parent="."]
+position = Vector2(64, 128)
+
+[node name="BallVendorSprite" type="Sprite2D" parent="BallVendor"]
+position = Vector2(-2.38419e-06, 1.3411e-07)
+scale = Vector2(25, 48)
+texture = SubResource("PlaceholderTexture2D_c1366")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BallVendor"]
+shape = SubResource("RectangleShape2D_3o21l")
+
+[node name="VendorInteractorArea" type="Area2D" parent="BallVendor"]
+
+[node name="VendorInteractorCollisionBody" type="CollisionShape2D" parent="BallVendor/VendorInteractorArea"]
+position = Vector2(0, 28)
+shape = SubResource("RectangleShape2D_c1366")
+
+[node name="RangePicker" type="RigidBody2D" parent="."]
+position = Vector2(-192, -208)
+rotation = 1.5708
+collision_layer = 3
+collision_mask = 3
+gravity_scale = 0.0
+script = ExtResource("6_3o21l")
+
+[node name="RangePickerSprite" type="Sprite2D" parent="RangePicker"]
+position = Vector2(3.05176e-05, -2.86102e-06)
+scale = Vector2(56.5, 35.5)
+texture = SubResource("PlaceholderTexture2D_3o21l")
+
+[node name="RangePickerCollisionBody" type="CollisionPolygon2D" parent="RangePicker"]
+polygon = PackedVector2Array(24, 16, -27, 16, -27, -16, 24, -16, 16, -8, -16, -8, -16, 8, 16, 8)
+
+[node name="RangePickerCollectionArea" type="Area2D" parent="RangePicker"]
+collision_layer = 2
+collision_mask = 2
+
+[node name="RangePickerCollectionAreaCollisionBody" type="CollisionShape2D" parent="RangePicker/RangePickerCollectionArea"]
+position = Vector2(-3, 0)
+shape = SubResource("RectangleShape2D_sa1mx")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="RangePicker"]
+libraries = {
+&"": SubResource("AnimationLibrary_kj8lm")
+}
+autoplay = "basicRangePath"
+
+[connection signal="bagPicked" from="Player" to="." method="removeBag"]
+[connection signal="bagPlaced" from="Player" to="." method="spawnBag"]
 [connection signal="ballPicked" from="Player" to="." method="remove_ball"]
 [connection signal="ballPlaced" from="Player" to="." method="spawn_ball"]
+[connection signal="cameraAdjusted" from="Player" to="." method="_on_player_camera_adjusted"]
 [connection signal="printData" from="Player" to="." method="_on_player_print_data"]
 [connection signal="requestTeePosition" from="Player" to="TeeBox" method="_on_player_request_tee_position"]
 [connection signal="swingTriggered" from="Player" to="." method="_on_player_swing_triggered"]
@@ -87,3 +213,6 @@ shape = SubResource("SegmentShape2D_5hqt4")
 [connection signal="body_entered" from="TeeBox/TeeBoxArea" to="Player" method="_on_tee_box_area_body_entered"]
 [connection signal="body_exited" from="TeeBox/TeeBoxArea" to="Player" method="_on_tee_box_area_body_exited"]
 [connection signal="teePlaced" from="TeeBox/Tee" to="TeeBox" method="_on_tee_tee_placed"]
+[connection signal="body_entered" from="BallVendor/VendorInteractorArea" to="Player" method="_on_vendor_interactor_area_body_entered"]
+[connection signal="body_exited" from="BallVendor/VendorInteractorArea" to="Player" method="_on_vendor_interactor_area_body_exited"]
+[connection signal="body_entered" from="RangePicker/RangePickerCollectionArea" to="." method="_on_range_picker_collection_area_body_entered"]

@@ -5,9 +5,12 @@ signal swingTriggered
 signal ballPicked
 signal printData
 signal requestTeePosition
+signal bagPlaced
+signal bagPicked
+signal cameraAdjusted
 
 const SPEED = 50.0
-var ballCount = 5
+var _ballCount = 0
 var idleDirection: Vector2 #(0,1) #default idle to look down
 var _spriteSize: Vector2
 var _offsetToFeet: int
@@ -15,6 +18,11 @@ var _isInTeeBox: bool = false
 var _ballOnTee: int = 0
 var _isTee: bool
 var _teePosition: Vector2
+var _atVendor: bool
+var _atBag: bool
+var _bagEquiped: bool = true #temporary starting variable for testing
+var _bag: Node2D
+var _cameraPanning: bool = false
 
 
 @onready var char_animation: AnimatedSprite2D = $AnimatedSprite2D
@@ -25,8 +33,9 @@ func _ready() -> void:
 	_offsetToFeet = _spriteSize.y #/ 2 - commented out since the collision shape was changed to occupy only the space below the player's waist	
 	
 func _process(delta: float) -> void:
+	#TODO: break code out into smaller functions
 	if isStationary():
-		if Input.is_action_just_pressed("look_down", false):
+		if Input.is_action_just_pressed("look_down", false) and not _cameraPanning:
 			#update player data
 			#signal to OpenWorld that player wants to swing
 			swingTriggered.emit(isFacingBall())
@@ -48,9 +57,22 @@ func _process(delta: float) -> void:
 		if Input.is_action_just_pressed("list"):
 			printData.emit()
 		
+		if Input.is_action_just_pressed("vend"):
+			if _atVendor:
+				_ballCount += 5
+				print("balls in bag: " + str(_ballCount))
+				
+		if Input.is_action_just_pressed("bag") and not _cameraPanning:
+			if _bagEquiped:
+				place_bag()
+			elif _atBag:
+				pick_up_bag()
+				
 
 
 func _physics_process(delta: float) -> void:
+	
+	# TODO: break sections up into individual functions to be called
 	# Get the input direction and handle the movement/deceleration.
 	# As good practice, you should replace UI actions with custom gameplay actions.
 	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
@@ -90,12 +112,13 @@ func _physics_process(delta: float) -> void:
 
 func place_ball(ballPosition: Vector2):
 	#check if player has a ball
-	if ballCount > 0:
+	if _ballCount > 0:
 		#send a signal to OpenWorld parent to create a new ball
 		ballPlaced.emit(ballPosition)
 		#update how many balls the player has
-		ballCount -= 1
+		_ballCount -= 1
 		print("You placed your ball at: " + str(ballPosition))
+		print("balls in bag: " + str(_ballCount))
 	else:
 		#update this error message to display to the player 
 		print("You are out of balls.")
@@ -103,9 +126,60 @@ func place_ball(ballPosition: Vector2):
 func pick_up_ball(id: int) -> void:
 		#handle logic to determine if player can pick up ball here (i.e. ball is in bounds or ball belongs to another player)
 		ballPicked.emit(id)
-		ballCount += 1
+		_ballCount += 1
+		print("balls in bag: " + str(_ballCount))
 		#future me probably needs to store ballCount in PlayerData only after checking that the pickup was succesful
 	
+func place_bag() -> void:
+	#signal to OW position to place bag (playerPosition + 11.9px * directionVector)
+	var bagPlacement = position + 11.9 * idleDirection #TODO: update hardcoded value to variable = to pick-up range (interactor area width/2?)
+	bagPlaced.emit(bagPlacement)
+	_bagEquiped = false
+	#adjust camera so that bottom of the frame can't go lower than the bag + player height
+	#(TODO: adjust camera to maximize view towards the nearest flag)
+	_cameraPanning = true
+	var screenSize = get_viewport_rect().end - _spriteSize * 6 # leave some room for the player
+	var offsetDirection = idleDirection
+	#check if direction is diagonal
+	if abs(offsetDirection.x) + abs(offsetDirection.y) > 1:
+		#treat screen size as if it were a square
+		screenSize.x = min(screenSize.x, screenSize.y)
+		screenSize.y = screenSize.x
+		#adjust offset direction vector so we can work with 1's instead of decimals
+		offsetDirection = offsetDirection / abs(offsetDirection)
+		
+	var newOffset = screenSize * offsetDirection / 4
+
+	while (abs($Camera2D.get_offset().y) < abs(newOffset.y) or abs($Camera2D.get_offset().x) < abs(newOffset.x)): #this is not a correct calculation - should compare to screen size
+		if _bagEquiped: break
+		$Camera2D.set_offset($Camera2D.get_offset() + offsetDirection)
+		print("Camera offset: " + str($Camera2D.get_offset()) + "\tnewOffset: " + str(newOffset) + "\toffsetDirection: " + str(offsetDirection))
+		await get_tree().create_timer(0.005).timeout
+	
+	cameraAdjusted.emit(newOffset)
+	_cameraPanning = false
+
+func pick_up_bag() -> void:
+	#signal to OW to remove bag
+	bagPicked.emit(_bag) #need to pass bag node
+	_bagEquiped = true
+	#realign camera to center on player
+	_cameraPanning = true
+	var offset = $Camera2D.get_offset()
+	print("camera offset at pickup: " +  str(offset))
+	#calculate offset direction vector from current offset so we can work with 1's
+	var reverseOffsetDirection: Vector2
+	if (offset.x != 0):
+		reverseOffsetDirection.x = -offset.x / abs(offset.x)
+	if (offset.y != 0):
+		reverseOffsetDirection.y = -offset.y /abs(offset.y)
+	print("reverseOffsetDirection: " +  str(reverseOffsetDirection))
+	print("bag pick signal emitted with argument: " + str(_bag))
+	while ($Camera2D.get_offset() != Vector2.ZERO and _bagEquiped):
+		$Camera2D.set_offset($Camera2D.get_offset() + reverseOffsetDirection)
+		await get_tree().create_timer(0.005).timeout
+	cameraAdjusted.emit(Vector2.ZERO)
+	_cameraPanning = false
 
 func isStationary():
 	return velocity == Vector2.ZERO
@@ -122,8 +196,8 @@ func isFacingBall() -> int:
 func setDirection(dir: Vector2) -> void:
 	idleDirection = dir
 
-func setBallCount(numBallsInPlay: int) -> void:
-	ballCount -= numBallsInPlay
+func setBallCount(numBalls: int) -> void:
+	_ballCount = numBalls
 	
 func isInTeeBox() -> bool:
 	return _isInTeeBox
@@ -170,3 +244,25 @@ func _on_tee_box_send_tee_position(pos: Vector2) -> void:
 		_isTee = false
 		
 	_teePosition = pos
+
+
+func _on_vendor_interactor_area_body_entered(body: Node2D) -> void:
+	if body == self:
+		_atVendor = true
+		print("Press V to vend")
+
+func _on_vendor_interactor_area_body_exited(body: Node2D) -> void:
+	if body == self:
+		_atVendor = false
+
+
+func _on_bag_interact_entered(body: Node2D, bag: Node2D) -> void:
+	if body == self:
+		_atBag = true
+		_bag = bag
+		print("Press B to pick up bag")
+
+
+func _on_bag_interact_exited(body: Node2D) -> void:
+	if body == self:
+		_atBag = false
