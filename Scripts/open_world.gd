@@ -60,9 +60,12 @@ func spawn_ball(pos: Vector2, dir2D: Vector2 = Vector2.ZERO, id: int = 0) -> voi
 			_data.ballsDict[id].launchConditions = Vector2.ZERO
 			_data.ballsDict[id].flightPath = flight_path
 			var flight_time = flight_path.getFlightTime()
+			var distance = flight_path.getDistance()
 			print("flight time: " + str(flight_time))
 			#hacky way to set the speed so that the ball stops when the flight stops
-			ball.speed = abs(flight_path.getXVel()) / flight_time
+			ball.speed = distance / flight_time
+			ball.dir2D = distance * ball.dir2D + ball.position
+			#update ball.dir2d to landing position
 			$Player.add_child(flight_path)
 	add_child(ball)
 	#connect the ballMoved signal and ensure that the ball's id is emitted as part of this object's signal payload
@@ -211,3 +214,22 @@ func _on_bag_interact_exit(body: Node2D):
 
 func _on_player_camera_adjusted(newOffset: Vector2) -> void:
 	_data.playerData.cameraOffset = newOffset
+
+
+func _on_player_toggle_vend_instructions() -> void:
+	$BallVendor/VendUsageLabel.visible = !$BallVendor/VendUsageLabel.visible
+
+
+func _on_player_toggle_ball_highlight(id: int) -> void:
+	var balls = get_tree().get_nodes_in_group("balls")
+	
+		
+	for ball in balls:
+		if id:
+			if ball.id == id:
+				#toggle highlight visibility
+				ball.isHighlighted = !ball.isHighlighted
+				return
+		else:
+			ball.isHighlighted = false
+					

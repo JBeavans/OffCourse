@@ -20,4 +20,4 @@ func _on_club_ball_struck(launchConditions: Vector2) -> void:
 	print('ball received on club ball struck signal')
 	print('launch vel: ' + str(launchConditions.x))
 	$CollisionShape2D.set_deferred("disabled", true)
-	move_and_collide(Vector2(launchConditions.x * 10, 0))
+	move_and_collide(Vector2(-launchConditions.x * 20, 0))

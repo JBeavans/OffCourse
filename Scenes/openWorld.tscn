@@ -107,7 +107,7 @@ script = ExtResource("1_5hqt4")
 
 [node name="Player" parent="." instance=ExtResource("1_5vkcm")]
 z_index = 1
-position = Vector2(-12, 196)
+position = Vector2(64, 240)
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
 zoom = Vector2(2, 2)
@@ -118,7 +118,7 @@ tile_map_data = PackedByteArray("AAAEAAQAAQAAAAAAAAD8/wQAAQAAAAAAAAD8//z/AQAAAAA
 tile_set = SubResource("TileSet_2k2ja")
 
 [node name="TeeBox" type="StaticBody2D" parent="."]
-position = Vector2(0, 128)
+position = Vector2(0, 200)
 script = ExtResource("4_c1366")
 
 [node name="TeeBoxSprite" type="Sprite2D" parent="TeeBox"]
@@ -142,8 +142,17 @@ script = ExtResource("5_3o21l")
 scale = Vector2(0.5, 1.5)
 texture = SubResource("CanvasTexture_5hqt4")
 
+[node name="DemoLabel" type="Label" parent="TeeBox"]
+offset_left = -28.0
+offset_top = 26.0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 9
+text = "|enter here|"
+metadata/_edit_use_anchors_ = true
+
 [node name="FlagStick" type="StaticBody2D" parent="."]
-position = Vector2(0, -191)
+position = Vector2(0, -250)
 
 [node name="FlagStickSprite" type="Sprite2D" parent="FlagStick"]
 position = Vector2(0, -17)
@@ -155,12 +164,33 @@ scale = Vector2(0.25, 1)
 shape = SubResource("SegmentShape2D_5hqt4")
 
 [node name="BallVendor" type="StaticBody2D" parent="."]
-position = Vector2(64, 128)
+position = Vector2(64, 200)
 
 [node name="BallVendorSprite" type="Sprite2D" parent="BallVendor"]
 position = Vector2(-2.38419e-06, 1.3411e-07)
 scale = Vector2(25, 48)
 texture = SubResource("PlaceholderTexture2D_c1366")
+
+[node name="DemoLabel" type="Label" parent="BallVendor"]
+offset_left = -13.0
+offset_top = -43.0
+offset_right = 30.0
+theme_override_constants/line_spacing = -13
+text = "balls 
+        |
+      <-"
+metadata/_edit_use_anchors_ = true
+
+[node name="VendUsageLabel" type="Label" parent="BallVendor"]
+visible = false
+offset_left = -12.0
+offset_top = -22.0
+offset_right = 12.0
+theme_override_constants/line_spacing = -5
+theme_override_font_sizes/font_size = 9
+text = "Press 'v'"
+horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BallVendor"]
 shape = SubResource("RectangleShape2D_3o21l")
@@ -170,6 +200,17 @@ shape = SubResource("RectangleShape2D_3o21l")
 [node name="VendorInteractorCollisionBody" type="CollisionShape2D" parent="BallVendor/VendorInteractorArea"]
 position = Vector2(0, 28)
 shape = SubResource("RectangleShape2D_c1366")
+
+[node name="DemoLabel" type="Label" parent="BallVendor/VendorInteractorArea"]
+offset_left = -20.0
+offset_top = 22.0
+offset_right = 22.0
+offset_bottom = 49.0
+theme_override_constants/line_spacing = -3
+theme_override_font_sizes/font_size = 8
+text = "   |         |
+stand here"
+metadata/_edit_use_anchors_ = true
 
 [node name="RangePicker" type="RigidBody2D" parent="."]
 position = Vector2(-192, -208)
@@ -209,6 +250,8 @@ autoplay = "basicRangePath"
 [connection signal="printData" from="Player" to="." method="_on_player_print_data"]
 [connection signal="requestTeePosition" from="Player" to="TeeBox" method="_on_player_request_tee_position"]
 [connection signal="swingTriggered" from="Player" to="." method="_on_player_swing_triggered"]
+[connection signal="toggleBallHighlight" from="Player" to="." method="_on_player_toggle_ball_highlight"]
+[connection signal="toggleVendInstructions" from="Player" to="." method="_on_player_toggle_vend_instructions"]
 [connection signal="sendTeePosition" from="TeeBox" to="Player" method="_on_tee_box_send_tee_position"]
 [connection signal="body_entered" from="TeeBox/TeeBoxArea" to="Player" method="_on_tee_box_area_body_entered"]
 [connection signal="body_exited" from="TeeBox/TeeBoxArea" to="Player" method="_on_tee_box_area_body_exited"]

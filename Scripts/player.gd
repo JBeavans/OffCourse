@@ -8,6 +8,8 @@ signal requestTeePosition
 signal bagPlaced
 signal bagPicked
 signal cameraAdjusted
+signal toggleVendInstructions
+signal toggleBallHighlight
 
 const SPEED = 50.0
 var _ballCount = 0
@@ -27,14 +29,24 @@ var _cameraPanning: bool = false
 
 @onready var char_animation: AnimatedSprite2D = $AnimatedSprite2D
 @onready var ray_cast: RayCast2D = $RayCast
+@onready var stats_label: Label = $StatsLabel
+
 
 func _ready() -> void:
 	_spriteSize = $CollisionShape2D.shape.get_rect().size
 	_offsetToFeet = _spriteSize.y #/ 2 - commented out since the collision shape was changed to occupy only the space below the player's waist	
 	
 func _process(delta: float) -> void:
+	stats_label.text = "Balls: " + str(_ballCount)
+	var targetBallID: int
+	
 	#TODO: break code out into smaller functions
 	if isStationary():
+		targetBallID = isFacingBall()
+		if targetBallID:
+			#highlight ball
+			toggleBallHighlight.emit(targetBallID)
+			pass
 		if Input.is_action_just_pressed("look_down", false) and not _cameraPanning:
 			#update player data
 			#signal to OpenWorld that player wants to swing
@@ -67,6 +79,11 @@ func _process(delta: float) -> void:
 				place_bag()
 			elif _atBag:
 				pick_up_bag()
+		
+	else:
+		#remove highlight from previously selected ball
+		targetBallID = 0
+		toggleBallHighlight.emit(targetBallID)
 				
 
 
@@ -188,7 +205,7 @@ func isFacingBall() -> int:
 	#temp return until methodology is determined
 	#returns id of nearest ball within searchable range (based on direction and player's stats)
 	var obj = ray_cast.get_collider()
-	print("is facing " + str(obj))
+	#print("is facing " + str(obj)) #this is getting called every frame right now - TODO: be more conservative with calling isFacingBall()
 	if obj is FindableArea:
 		return obj.get_parent().id
 	return 0 
@@ -223,8 +240,8 @@ func _on_tee_box_area_body_entered(body: Node2D) -> void:
 	elif body.is_in_group("balls"):
 		_ballOnTee = body.id
 		print("ball id: " + str(_ballOnTee) + " on tee")
-	else:
-		print(body.name + " entered tee box")
+	#else:
+		#print(body.name + " entered tee box")
 
 
 func _on_tee_box_area_body_exited(body: Node2D) -> void:
@@ -237,7 +254,7 @@ func _on_tee_box_area_body_exited(body: Node2D) -> void:
 
 
 func _on_tee_box_send_tee_position(pos: Vector2) -> void:
-	print("Tee Position: " + str(pos))
+	#print("Tee Position: " + str(pos))
 	if not pos == null:
 		_isTee = true
 	else:
@@ -249,11 +266,12 @@ func _on_tee_box_send_tee_position(pos: Vector2) -> void:
 func _on_vendor_interactor_area_body_entered(body: Node2D) -> void:
 	if body == self:
 		_atVendor = true
-		print("Press V to vend")
+		toggleVendInstructions.emit()
 
 func _on_vendor_interactor_area_body_exited(body: Node2D) -> void:
 	if body == self:
 		_atVendor = false
+		toggleVendInstructions.emit()
 
 
 func _on_bag_interact_entered(body: Node2D, bag: Node2D) -> void:

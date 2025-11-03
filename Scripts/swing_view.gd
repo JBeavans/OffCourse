@@ -40,17 +40,17 @@ func _on_club_ball_struck(launchConditions: Vector2) -> void:
 	#calculate openWorld ball velocity
 	var launchVel2D = launchVel * cos(launchAngle)
 	#TODO: add variables to change velocity and rotation based on ballType
-	var ballVelocity: Vector2 = abs(launchVel2D) * _data.playerData.dir.orthogonal()
+	#var ballVelocity: Vector2 = abs(launchVel2D) * _data.playerData.dir.orthogonal()
 	var activeBall = _data.activeBallID
 	#set dictionary data for ball velocity... which is actually just the balls projected landing point
 	print("active ball: " + str(_data.activeBallID ))
-	_data.ballsDict[activeBall].dir2D = ballVelocity + _data.ballsDict[activeBall].pos
+	_data.ballsDict[activeBall].dir2D = _data.playerData.dir.orthogonal()#ballVelocity + _data.ballsDict[activeBall].pos
 	_data.ballsDict[activeBall].launchConditions = launchConditions
 	var i:= 0
 	for ball in _data.balls:
 		if ball.ballID == activeBall:
 			#set array data for ball velocity (actually just the projected landing point)
-			_data.balls[i].dir2D = ballVelocity + _data.balls[i].pos #there has to be a better way
+			_data.balls[i].dir2D = _data.playerData.dir.orthogonal()#ballVelocity + _data.balls[i].pos #there has to be a better way
 			_data.balls[i].launchConditions = launchConditions
 			#set active ball back to 0 before returning (this will make it easier to check if another player is swinging)
 			_data.activeBallID = 0

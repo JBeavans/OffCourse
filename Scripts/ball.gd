@@ -9,6 +9,7 @@ var hasVelocity: bool = false
 var dir2D: Vector2 # new position based on launch velocity
 var id: int
 var speed: float = 0.0
+var isHighlighted: bool = false
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	add_to_group("balls")
@@ -16,6 +17,9 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	
+	$BallSprite/HighlightSprite.visible = isHighlighted
+	
 	if hasVelocity:
 		var prev_pos:= position
 		#move_and_collide(velocity * delta)

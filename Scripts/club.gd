@@ -10,7 +10,7 @@ signal swingToggled
 
 const PIX_PER_YD: float = 3.0
 const SPEED_SCALE = 0.02
-const MAX_V = 120.0 # "yds/s"
+const MAX_V = 80.5 # m/s
 var x0: float
 var velX0:= 0.0
 #var zVel: float
@@ -61,10 +61,10 @@ func _physics_process(delta: float) -> void:
 		if (collision): 
 			print("club collided with " + collision.get_collider().name)
 			#TODO: create a formula that updates based on club attributes
-			var launchVelocity = max(velocity.x, -MAX_V)
+			var launchVelocity = min(-velocity.x, MAX_V)
 			
 			#send the launchConditions
-			ballStruck.emit(Vector2(launchVelocity * PIX_PER_YD, launchAngle))
+			ballStruck.emit(Vector2(launchVelocity, launchAngle)) #removed Pixel/yd factor since I decided to commit to working in m/s. Distance conversion should be done elsewhere.
 	
 	#reset the club when the user releases the LMB and stop the swing sound
 	elif Input.is_action_just_released("swing"):
