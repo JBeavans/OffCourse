@@ -8,13 +8,13 @@ signal swingToggled
 
 @onready var swing_sound: AudioStreamPlayer2D = $"../swingSound"
 
-const PIX_PER_YD: float = 3.0
+#const PIX_PER_YD: float = 3.0
 const SPEED_SCALE = 0.02
-const MAX_V = 80.5 # m/s
+const MAX_V = 60.0 # m/s
 var x0: float
 var velX0:= 0.0
 #var zVel: float
-var launchAngle:= 20.0 #degrees
+var launchAngle:= 12.1 #degrees
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.
@@ -61,7 +61,7 @@ func _physics_process(delta: float) -> void:
 		if (collision): 
 			print("club collided with " + collision.get_collider().name)
 			#TODO: create a formula that updates based on club attributes
-			var launchVelocity = min(-velocity.x, MAX_V)
+			var launchVelocity = min(-velocity.x/5, MAX_V)
 			
 			#send the launchConditions
 			ballStruck.emit(Vector2(launchVelocity, launchAngle)) #removed Pixel/yd factor since I decided to commit to working in m/s. Distance conversion should be done elsewhere.

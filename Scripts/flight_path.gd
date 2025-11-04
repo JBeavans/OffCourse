@@ -30,14 +30,14 @@ var distanceLabelXOrigin: float
 
 #initialize with ball's launch velocity and angle
 func setup(launchConditions: Vector2) -> void:
-	_launchVel = launchConditions.x
-	_launchAngle = deg_to_rad(launchConditions.y)
-	_yVel0 = _launchVel * sin(_launchAngle)
-	_xVel0 = _launchVel * cos(_launchAngle)
+	#_launchVel = launchConditions.x
+	#_launchAngle = deg_to_rad(launchConditions.y)
+	#_yVel0 = _launchVel * sin(_launchAngle)
+	#_xVel0 = _launchVel * cos(_launchAngle)
 	#calculateTerminalVelocity()
 	#_flightTime = 2 * _yVel0 / GRAVITY # 2 * time to peak of flight [Vy = 0]
 	#calculateFlightTimeWithDrag()
-	$FlightPathSolver.solve()
+	$FlightPathSolver.solve(launchConditions)
 	_flightTime = $FlightPathSolver.time_total
 	_distance = $FlightPathSolver.distance
 	_maxSimTime = $FlightPathSolver.t

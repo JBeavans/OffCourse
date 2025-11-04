@@ -10,8 +10,8 @@
 radius = 2.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_376qj"]
-radius = 3.5
-height = 18.0
+radius = 2.0
+height = 6.0
 
 [node name="Ball" type="RigidBody2D"]
 collision_layer = 2
@@ -26,6 +26,7 @@ texture = ExtResource("1_cxn8p")
 
 [node name="HighlightSprite" type="Sprite2D" parent="BallSprite"]
 visible = false
+modulate = Color(0.526085, 0.661007, 0.897779, 1)
 show_behind_parent = true
 scale = Vector2(8, 8)
 texture = SubResource("PlaceholderTexture2D_376qj")

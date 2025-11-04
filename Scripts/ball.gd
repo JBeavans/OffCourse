@@ -21,6 +21,7 @@ func _process(delta: float) -> void:
 	$BallSprite/HighlightSprite.visible = isHighlighted
 	
 	if hasVelocity:
+		isHighlighted = false
 		var prev_pos:= position
 		#move_and_collide(velocity * delta)
 		position = position.move_toward(dir2D, delta * speed)

@@ -28,8 +28,8 @@ var _cameraPanning: bool = false
 
 
 @onready var char_animation: AnimatedSprite2D = $AnimatedSprite2D
-@onready var ray_cast: RayCast2D = $RayCast
 @onready var stats_label: Label = $StatsLabel
+@onready var ball_finder_area: Area2D = $BallFinderArea
 
 
 func _ready() -> void:
@@ -46,7 +46,6 @@ func _process(delta: float) -> void:
 		if targetBallID:
 			#highlight ball
 			toggleBallHighlight.emit(targetBallID)
-			pass
 		if Input.is_action_just_pressed("look_down", false) and not _cameraPanning:
 			#update player data
 			#signal to OpenWorld that player wants to swing
@@ -99,29 +98,30 @@ func _physics_process(delta: float) -> void:
 	# Set animations based on updated direction
 	if idleDirection == Vector2.UP:
 		char_animation.play("idleUp")
-		ray_cast.rotation_degrees = 180.0
+		ball_finder_area.rotation_degrees = 180.0
+		
 	elif idleDirection.x > 0 && idleDirection.x < 1 && idleDirection.y < 0 && idleDirection.y > -1: #using a range since checking for the specific float printed didn't work
 		char_animation.play("idleNE")
-		ray_cast.rotation_degrees = -135.0
+		ball_finder_area.rotation_degrees = -135.0
 	elif idleDirection == Vector2.RIGHT:
 		char_animation.play("idleRight")
-		ray_cast.rotation_degrees = -90.0
+		ball_finder_area.rotation_degrees = -90.0
 	elif idleDirection.x > 0 && idleDirection.x < 1 && idleDirection.y > 0 && idleDirection.y < 1:
 		char_animation.play("idleSE")
-		ray_cast.rotation_degrees = -45.0
+		ball_finder_area.rotation_degrees = -45.0
 	elif idleDirection == Vector2.DOWN:
 		char_animation.play("idleDown")
-		ray_cast.rotation_degrees = 0.0
+		ball_finder_area.rotation_degrees = 0.0
 	elif idleDirection.x < 0 && idleDirection.x > -1 && idleDirection.y > 0 && idleDirection.y < 1:
 		char_animation.play("idleSW")
 		#print(direction.angle())
-		ray_cast.rotation_degrees = 45.0
+		ball_finder_area.rotation_degrees = 45.0
 	elif idleDirection == Vector2.LEFT:
 		char_animation.play("idleLeft")
-		ray_cast.rotation_degrees = 90.0
+		ball_finder_area.rotation_degrees = 90.0
 	elif idleDirection.x < 0 && idleDirection.x > -1 && idleDirection.y < 0 && idleDirection.y > -1:
 		char_animation.play("idleNW")
-		ray_cast.rotation_degrees = 135.0
+		ball_finder_area.rotation_degrees = 135.0
 	
 	velocity = direction * SPEED
 	
@@ -203,11 +203,22 @@ func isStationary():
 	
 func isFacingBall() -> int:
 	#temp return until methodology is determined
-	#returns id of nearest ball within searchable range (based on direction and player's stats)
-	var obj = ray_cast.get_collider()
+	#returns id of nearest ball within searchable range (based on direction and TODO:player's stats)
+	var areas = ball_finder_area.get_overlapping_areas()
+	var max_range = 21*21 
+	var closestBall: Ball
+	for area in areas:
+		if area is FindableArea:
+			var range = ball_finder_area.position.distance_squared_to(area.position)
+			if range < max_range:
+				closestBall = area.get_parent()
+				max_range = range
+				
+	if not closestBall == null:
+		closestBall.isHighlighted = true
+		#	print("is facing " + str(closestBall.id))
+		return closestBall.id
 	#print("is facing " + str(obj)) #this is getting called every frame right now - TODO: be more conservative with calling isFacingBall()
-	if obj is FindableArea:
-		return obj.get_parent().id
 	return 0 
 	
 func setDirection(dir: Vector2) -> void:

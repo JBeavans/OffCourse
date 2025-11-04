@@ -114,7 +114,7 @@ zoom = Vector2(2, 2)
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 z_index = -1
-tile_map_data = PackedByteArray("AAAEAAQAAQAAAAAAAAD8/wQAAQAAAAAAAAD8//z/AQAAAAAAAAAEAPz/AQAAAAAAAAD0//z/AQAAAAAAAAD0/wQAAQAAAAAAAAAMAAQAAQAAAAAAAAAMAPz/AQAAAAAAAADs//z/AQAAAAAAAADs/wQAAQAAAAAAAADs/wwAAQAAAAAAAAD0/wwAAQAAAAAAAAD8/wwAAQAAAAAAAAAEAAwAAQAAAAAAAAAMAAwAAQAAAAAAAAAUAAwAAQAAAAAAAAAUAAQAAQAAAAAAAAAUAPz/AQAAAAAAAAAUAPT/AQAAAAAAAAAMAPT/AQAAAAAAAAAEAPT/AQAAAAAAAAD8//T/AQAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAEAAQAAQAAAAAAAAD8/wQAAQAAAAAAAAD8//z/AQAAAAAAAAAEAPz/AQAAAAAAAAD0//z/AQAAAAAAAAD0/wQAAQAAAAAAAAAMAAQAAQAAAAAAAAAMAPz/AQAAAAAAAADs//z/AQAAAAAAAADs/wQAAQAAAAAAAADs/wwAAQAAAAAAAAD0/wwAAQAAAAAAAAD8/wwAAQAAAAAAAAAEAAwAAQAAAAAAAAAMAAwAAQAAAAAAAAAUAAwAAQAAAAAAAAAUAAQAAQAAAAAAAAAUAPz/AQAAAAAAAAAUAPT/AQAAAAAAAAAMAPT/AQAAAAAAAAAEAPT/AQAAAAAAAAD8//T/AQAAAAAAAAD7/9T/AQAAAAAAAAADANT/AQAAAAAAAAD7/9z/AQAAAAAAAAADANz/AQAAAAAAAAD7/7j/AQAAAAAAAAADALj/AQAAAAAAAAD7/8D/AQAAAAAAAAADAMD/AQAAAAAAAAA=")
 tile_set = SubResource("TileSet_2k2ja")
 
 [node name="TeeBox" type="StaticBody2D" parent="."]
@@ -160,6 +160,30 @@ scale = Vector2(1, 33)
 texture = SubResource("CanvasTexture_5vkcm")
 
 [node name="FlagStickCollisionBody" type="CollisionShape2D" parent="FlagStick"]
+scale = Vector2(0.25, 1)
+shape = SubResource("SegmentShape2D_5hqt4")
+
+[node name="FlagStick2" type="StaticBody2D" parent="."]
+position = Vector2(0, -700)
+
+[node name="FlagStickSprite" type="Sprite2D" parent="FlagStick2"]
+position = Vector2(0, -17)
+scale = Vector2(1, 33)
+texture = SubResource("CanvasTexture_5vkcm")
+
+[node name="FlagStickCollisionBody" type="CollisionShape2D" parent="FlagStick2"]
+scale = Vector2(0.25, 1)
+shape = SubResource("SegmentShape2D_5hqt4")
+
+[node name="FlagStick3" type="StaticBody2D" parent="."]
+position = Vector2(0, -1150)
+
+[node name="FlagStickSprite" type="Sprite2D" parent="FlagStick3"]
+position = Vector2(0, -17)
+scale = Vector2(1, 33)
+texture = SubResource("CanvasTexture_5vkcm")
+
+[node name="FlagStickCollisionBody" type="CollisionShape2D" parent="FlagStick3"]
 scale = Vector2(0.25, 1)
 shape = SubResource("SegmentShape2D_5hqt4")
 

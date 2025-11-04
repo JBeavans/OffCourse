@@ -254,13 +254,6 @@ autoplay = "idleDown"
 position = Vector2(0, 10)
 shape = SubResource("CapsuleShape2D_sweqy")
 
-[node name="RayCast" type="RayCast2D" parent="."]
-position = Vector2(0, 13)
-target_position = Vector2(0, 12)
-collision_mask = 4
-collide_with_areas = true
-collide_with_bodies = false
-
 [node name="StatsLabel" type="Label" parent="."]
 offset_left = -19.0
 offset_top = 23.0
@@ -268,3 +261,13 @@ offset_right = 21.0
 offset_bottom = 51.0
 theme_override_font_sizes/font_size = 10
 text = "Balls: "
+
+[node name="BallFinderArea" type="Area2D" parent="."]
+position = Vector2(0, 13)
+collision_layer = 4
+collision_mask = 4
+
+[node name="BallFinderCollisionShape" type="CollisionPolygon2D" parent="BallFinderArea"]
+position = Vector2(6.31089e-30, -13)
+scale = Vector2(1, 0.991071)
+polygon = PackedVector2Array(0, 13, 8, 21, 8, 27, -8, 27, -8, 21)

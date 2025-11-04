@@ -27,10 +27,6 @@ var rolling_friction := 1.6#0.45
 var dt := 0.001
 var max_sim_time := 15.0
 
-# Visualization (meters -> pixels)
-var scale_px_per_m := 4.0
-var origin_screen := Vector2(50, 420)
-
 # ---------- State ----------
 var vx := v0 * cos(theta0)
 var vy := v0 * sin(theta0)
@@ -95,7 +91,16 @@ func acceleration(vx_val: float, vy_val: float, omega_val: float) -> Vector2:
 	return Vector2(ax, ay)
 
 # ---------- Main simulation ----------
-func solve():
+func solve(launchConditions: Vector2, wind = wind_speed, spin = spin_rpm0):
+	v0 = launchConditions.x                          # m/s launch speed
+	theta0 = deg_to_rad(launchConditions.y)          # launch angle in radians #10.6 for longest pga driver
+	spin_rpm0 = spin                 # initial backspin (rpm)
+	omega = 2.0 * PI * spin_rpm0 / 60.0 # rad/s
+	wind_speed = wind
+	
+	vx = v0 * cos(theta0)
+	vy = v0 * sin(theta0)  
+
 	positions.clear()
 	positions.append(Vector2(x, y))
 	max_Cl = 0.0

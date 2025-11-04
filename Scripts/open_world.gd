@@ -26,13 +26,10 @@ func spawn_ball(pos: Vector2, dir2D: Vector2 = Vector2.ZERO, id: int = 0) -> voi
 	print("spawn_ball signal received")
 	var ball = ball_scene.instantiate()
 	ball.position = pos
+	ball.dir2D = dir2D
 		
 	if not dir2D == Vector2.ZERO: #this leaves an edge case of the the calculated new position of the ball being (0,0)
 		ball.hasVelocity = true
-		var launchConditions = _data.ballsDict[id].launchConditions
-		ball.speed = -launchConditions.x * cos(deg_to_rad(launchConditions.y))
-	ball.dir2D = dir2D #follow up with correct assignment
-	 
 	
 	#check if this is a new ball (does not have an ID yet)
 	if id == 0:
@@ -64,13 +61,14 @@ func spawn_ball(pos: Vector2, dir2D: Vector2 = Vector2.ZERO, id: int = 0) -> voi
 			print("flight time: " + str(flight_time))
 			#hacky way to set the speed so that the ball stops when the flight stops
 			ball.speed = distance / flight_time
-			ball.dir2D = distance * ball.dir2D + ball.position
 			#update ball.dir2d to landing position
-			$Player.add_child(flight_path)
+			ball.dir2D = distance * ball.dir2D + ball.position
+			ball.add_child(flight_path)
+			$Player/Camera2D.reparent(ball)
 	add_child(ball)
 	#connect the ballMoved signal and ensure that the ball's id is emitted as part of this object's signal payload
 	ball.ballMoved.connect(_on_ballMoved.bind(ball.id))
-	ball.ballStopped.connect(_on_ballStopped)
+	ball.ballStopped.connect(_on_ballStopped.bind(ball.id))
 
 #further define logic in an on_ball_picked(id: int) method that does logic and/or waits for further input from player before calling remove_ball	
 func remove_ball(id: int) -> void:
@@ -114,8 +112,6 @@ func load_players(playersInScene: Array[PlayerData]) -> void:
 
 
 func _populateScene() -> void:
-	if not _data.balls == null:
-		load_balls(_data.balls)
 	if not _data.playerData == null:
 		#update to load_players if tracking more than one player
 		#spawn_player(_data.playerData.pos, _data.playerData.dir)
@@ -129,6 +125,8 @@ func _populateScene() -> void:
 			print("open world loaded bag")
 	else:
 		print("No Player Data!")
+	if not _data.balls == null:
+		load_balls(_data.balls)
 
 
 func _on_player_swing_triggered(id: int) -> void:
@@ -176,9 +174,21 @@ func _on_ballMoved(pos: Vector2, dir: Vector2, id: int) -> void:
 	_data.ballsDict[id].pos = pos
 	_data.ballsDict[id].dir2D = dir
 	
-func _on_ballStopped() -> void:
+func _on_ballStopped(id: int) -> void:
 	_data.activeBallID = 0
-	$Player.get_child(-1).queue_free()
+	var balls = get_tree().get_nodes_in_group("balls")
+	var activeBall
+	
+	for ball in balls:
+		if ball.id == id:
+			activeBall = ball
+			break
+	
+	await get_tree().create_timer(0.75).timeout
+	activeBall.get_child(-1).reparent($Player)
+	$Player/Camera2D.position = Vector2.ZERO
+	$Player/Camera2D.set_offset(_data.playerData.cameraOffset)
+	activeBall.get_child(-1).queue_free()
 	print("ball stopped")
 
 func _on_player_print_data() -> void:
@@ -189,7 +199,9 @@ func _on_range_picker_collection_area_body_entered(body: Node2D) -> void:
 	if body.is_in_group("balls"):
 		var pickedBall: Ball = body
 		if pickedBall.hasVelocity:
-			_on_ballStopped()
+			#_on_ballStopped(pickedBall.id, 0.01)
+			#await get_tree().create_timer(0.25).timeout
+			return
 		remove_ball(pickedBall.id)
 		
 func spawnBag(pos: Vector2):
@@ -225,11 +237,7 @@ func _on_player_toggle_ball_highlight(id: int) -> void:
 	
 		
 	for ball in balls:
-		if id:
-			if ball.id == id:
-				#toggle highlight visibility
-				ball.isHighlighted = !ball.isHighlighted
-				return
-		else:
+		if ball.id != id:
+			#turn off highlight sprite visibility for all other balls
 			ball.isHighlighted = false
 					
