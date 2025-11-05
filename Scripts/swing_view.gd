@@ -17,6 +17,11 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	if Input.is_action_pressed("ui_right"):
+		$AimController.rotation_degrees += 0.25
+	if Input.is_action_pressed("ui_left"):
+		$AimController.rotation_degrees -= 0.25
+	
 	if Input.is_action_just_released("look_down", false):
 		#make sure activeBallID is reset if the player does not hit the balld
 		_data.activeBallID = 0
@@ -50,7 +55,7 @@ func _on_club_ball_struck(launchConditions: Vector2) -> void:
 	for ball in _data.balls:
 		if ball.ballID == activeBall:
 			#set array data for ball velocity (actually just the projected landing point)
-			_data.balls[i].dir2D = _data.playerData.dir.orthogonal()#ballVelocity + _data.balls[i].pos #there has to be a better way
+			_data.balls[i].dir2D = _data.playerData.dir.orthogonal().rotated(-$AimController.rotation)#ballVelocity + _data.balls[i].pos #there has to be a better way
 			_data.balls[i].launchConditions = launchConditions
 			#set active ball back to 0 before returning (this will make it easier to check if another player is swinging)
 			_data.activeBallID = 0

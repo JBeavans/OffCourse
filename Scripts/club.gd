@@ -14,7 +14,7 @@ const MAX_V = 60.0 # m/s
 var x0: float
 var velX0:= 0.0
 #var zVel: float
-var launchAngle:= 12.1 #degrees
+var launchAngle:= 12.0 #degrees
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.

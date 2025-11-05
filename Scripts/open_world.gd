@@ -56,14 +56,16 @@ func spawn_ball(pos: Vector2, dir2D: Vector2 = Vector2.ZERO, id: int = 0) -> voi
 			#reset launch conditions of given ball to zero so the node is only added once
 			_data.ballsDict[id].launchConditions = Vector2.ZERO
 			_data.ballsDict[id].flightPath = flight_path
-			var flight_time = flight_path.getFlightTime()
-			var distance = flight_path.getDistance()
-			print("flight time: " + str(flight_time))
+			#var flight_time = flight_path.getFlightTime()
+			#var distance = flight_path.getDistance()
+			#print("flight time: " + str(flight_time))
 			#hacky way to set the speed so that the ball stops when the flight stops
-			ball.speed = distance / flight_time
+			#ball.speed = distance / flight_time
 			#update ball.dir2d to landing position
-			ball.dir2D = distance * ball.dir2D + ball.position
+			#ball.dir2D = distance * ball.dir2D + ball.position
 			ball.add_child(flight_path)
+			ball.connectToFlightPath()
+			#FlightPath.testConnected.connect(_on_connectionTest)
 			$Player/Camera2D.reparent(ball)
 	add_child(ball)
 	#connect the ballMoved signal and ensure that the ball's id is emitted as part of this object's signal payload
@@ -207,7 +209,7 @@ func _on_range_picker_collection_area_body_entered(body: Node2D) -> void:
 func spawnBag(pos: Vector2):
 	var bag = bag_scene.instantiate()
 	bag.position = pos
-	bag.bagInteractorEntered.connect(_on_bag_interact_enter) #NOT CONNECTED CORRECTLY
+	bag.bagInteractorEntered.connect(_on_bag_interact_enter)
 	bag.bagInteractorExited.connect(_on_bag_interact_exit)
 	_data.playerData.bagLocation = pos
 	add_child(bag)

@@ -35,6 +35,25 @@ offset_bottom = 12.0
 script = ExtResource("3_pd6ls")
 metadata/_edit_use_anchors_ = true
 
+[node name="AimController" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -24.0
+offset_top = -99.0
+offset_right = 53.0
+offset_bottom = -74.0
+
+[node name="ColorRect" type="ColorRect" parent="AimController"]
+layout_mode = 2
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -16.5
+offset_right = -272.0
+offset_bottom = -8.5
+grow_vertical = 2
+color = Color(0.787542, 4.16331e-06, 5.77569e-07, 1)
+
 [connection signal="accChanged" from="club" to="swingSound" method="_on_club_acc_changed"]
 [connection signal="ballStruck" from="club" to="." method="_on_club_ball_struck"]
 [connection signal="ballStruck" from="club" to="ball" method="_on_club_ball_struck"]

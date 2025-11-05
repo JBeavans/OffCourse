@@ -170,7 +170,7 @@ func place_bag() -> void:
 	while (abs($Camera2D.get_offset().y) < abs(newOffset.y) or abs($Camera2D.get_offset().x) < abs(newOffset.x)): #this is not a correct calculation - should compare to screen size
 		if _bagEquiped: break
 		$Camera2D.set_offset($Camera2D.get_offset() + offsetDirection)
-		print("Camera offset: " + str($Camera2D.get_offset()) + "\tnewOffset: " + str(newOffset) + "\toffsetDirection: " + str(offsetDirection))
+		#print("Camera offset: " + str($Camera2D.get_offset()) + "\tnewOffset: " + str(newOffset) + "\toffsetDirection: " + str(offsetDirection))
 		await get_tree().create_timer(0.005).timeout
 	
 	cameraAdjusted.emit(newOffset)
@@ -183,14 +183,14 @@ func pick_up_bag() -> void:
 	#realign camera to center on player
 	_cameraPanning = true
 	var offset = $Camera2D.get_offset()
-	print("camera offset at pickup: " +  str(offset))
+	#print("camera offset at pickup: " +  str(offset))
 	#calculate offset direction vector from current offset so we can work with 1's
 	var reverseOffsetDirection: Vector2
 	if (offset.x != 0):
 		reverseOffsetDirection.x = -offset.x / abs(offset.x)
 	if (offset.y != 0):
 		reverseOffsetDirection.y = -offset.y /abs(offset.y)
-	print("reverseOffsetDirection: " +  str(reverseOffsetDirection))
+	#print("reverseOffsetDirection: " +  str(reverseOffsetDirection))
 	print("bag pick signal emitted with argument: " + str(_bag))
 	while ($Camera2D.get_offset() != Vector2.ZERO and _bagEquiped):
 		$Camera2D.set_offset($Camera2D.get_offset() + reverseOffsetDirection)
