@@ -7,6 +7,8 @@ var ballsInBag: int
 var balls: Array[int] #should contain a list of ballIDs belonging to the player
 var bagLocation: Vector2
 var cameraOffset: Vector2
+var club: String
+var bagState #sort out variable typing later TODO: make a bagState data type
 
 func _init() -> void:
 	balls = []

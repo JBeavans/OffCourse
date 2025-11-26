@@ -12,6 +12,7 @@ buffer_length = 0.2
 
 [node name="swingView" type="Node2D"]
 script = ExtResource("1_tf04c")
+clubID = "default_8-iron"
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(2, 2)

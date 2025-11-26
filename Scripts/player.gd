@@ -10,6 +10,7 @@ signal bagPicked
 signal cameraAdjusted
 signal toggleVendInstructions
 signal toggleBallHighlight
+#signal bagViewToggled
 
 const SPEED = 50.0
 var _ballCount = 0
@@ -25,7 +26,7 @@ var _atBag: bool
 var _bagEquiped: bool = true #temporary starting variable for testing
 var _bag: Node2D
 var _cameraPanning: bool = false
-
+@export var _equippedClub: String = "empty"
 
 @onready var char_animation: AnimatedSprite2D = $AnimatedSprite2D
 @onready var stats_label: Label = $StatsLabel
@@ -49,8 +50,7 @@ func _process(delta: float) -> void:
 		if Input.is_action_just_pressed("look_down", false) and not _cameraPanning:
 			#update player data
 			#signal to OpenWorld that player wants to swing
-			swingTriggered.emit(isFacingBall())
-			#get_tree().change_scene_to_file("res://Scenes/swingView.tscn")
+			swingTriggered.emit(isFacingBall(), _equippedClub)
 			
 		if Input.is_action_just_pressed("interact_ball"):
 			var id = isFacingBall()
@@ -78,13 +78,19 @@ func _process(delta: float) -> void:
 				place_bag()
 			elif _atBag:
 				pick_up_bag()
+				
+		if _atBag and Input.is_action_just_pressed("interact") and not _cameraPanning:
+			#interact bag
+			_bag.toggleBagView()
+			
+		if _atBag and _bag.get_child(-1).name == "BagView":
+			handle_bag_inventory_interact()
 		
 	else:
 		#remove highlight from previously selected ball
 		targetBallID = 0
 		toggleBallHighlight.emit(targetBallID)
-				
-
+		
 
 func _physics_process(delta: float) -> void:
 	
@@ -126,6 +132,17 @@ func _physics_process(delta: float) -> void:
 	velocity = direction * SPEED
 	
 	move_and_slide()
+
+func handle_bag_inventory_interact() -> void:
+	if Input.is_action_just_pressed("cycle_left"):
+		_bag.toggleSelectedLeft()
+		print("toggled left")
+	elif Input.is_action_just_pressed("cycle_right"):
+		_bag.toggleSelectedRight()
+		print("toggled right")
+	elif Input.is_action_just_pressed("exchange"):
+		_equippedClub = _bag.exchangeClub(_equippedClub)
+		print("club exchanged. Now holding ", _equippedClub)
 
 func place_ball(ballPosition: Vector2):
 	#check if player has a ball
@@ -177,6 +194,8 @@ func place_bag() -> void:
 	_cameraPanning = false
 
 func pick_up_bag() -> void:
+	#save bag state
+	_bag.saveBagState()
 	#signal to OW to remove bag
 	bagPicked.emit(_bag) #need to pass bag node
 	_bagEquiped = true
@@ -241,7 +260,7 @@ func toggle_ball_on_tee():
 		place_ball(_teePosition + Vector2(0, -0.75))
 		
 
-
+##Signal Handlers
 func _on_tee_box_area_body_entered(body: Node2D) -> void:
 	if body == self:
 		_isInTeeBox = true

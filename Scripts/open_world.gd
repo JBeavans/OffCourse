@@ -56,13 +56,7 @@ func spawn_ball(pos: Vector2, dir2D: Vector2 = Vector2.ZERO, id: int = 0) -> voi
 			#reset launch conditions of given ball to zero so the node is only added once
 			_data.ballsDict[id].launchConditions = Vector2.ZERO
 			_data.ballsDict[id].flightPath = flight_path
-			#var flight_time = flight_path.getFlightTime()
-			#var distance = flight_path.getDistance()
-			#print("flight time: " + str(flight_time))
-			#hacky way to set the speed so that the ball stops when the flight stops
-			#ball.speed = distance / flight_time
-			#update ball.dir2d to landing position
-			#ball.dir2D = distance * ball.dir2D + ball.position
+			
 			ball.add_child(flight_path)
 			ball.connectToFlightPath()
 			#FlightPath.testConnected.connect(_on_connectionTest)
@@ -101,16 +95,17 @@ func load_balls(ballsInPlay: Array) -> void:
 	
 
 #loads the player given a position and direction
-func spawn_player(pos: Vector2, dir: Vector2) -> void:
+func spawn_player(pos: Vector2, dir: Vector2, club: String = "empty") -> void:
 	var player = player_scene.instantiate()
 	player.position = pos
 	player.idleDirection = dir
+	player._equippedClub = club
 	add_child(player)
 	print("player spawned")
 	
 func load_players(playersInScene: Array[PlayerData]) -> void:
 	for player in playersInScene:
-		spawn_player(player.pos, player.dir)
+		spawn_player(player.pos, player.dir, player.club)
 
 
 func _populateScene() -> void:
@@ -119,6 +114,7 @@ func _populateScene() -> void:
 		#spawn_player(_data.playerData.pos, _data.playerData.dir)
 		$Player.position = _data.playerData.pos
 		$Player.setDirection(_data.playerData.dir)
+		$Player._equippedClub = _data.playerData.club
 		$Player.setBallCount(_data.playerData.ballsInBag)
 		$Player/Camera2D.set_offset(_data.playerData.cameraOffset)
 		if (_data.playerData.cameraOffset != Vector2.ZERO):
@@ -131,15 +127,16 @@ func _populateScene() -> void:
 		load_balls(_data.balls)
 
 
-func _on_player_swing_triggered(id: int) -> void:
+func _on_player_swing_triggered(id: int, club: String) -> void:
 	#stop player from swinging if they aren't facing their ball or if another ball is still in motion.
 	#TODO: update check so that changing views is only dependent on if another ball is in motion
 	if (_data.activeBallID == 0):
 		_data.playerData.pos = $Player.position
 		_data.playerData.dir = $Player.idleDirection
 		_data.playerData.ballsInBag = $Player._ballCount #test to see if I can access what I thought was a private variable
+		_data.playerData.club = club
 		_data.activeBallID = id
-		print("Player at: " + str(_data.playerData.pos) + " facing: " + str(_data.playerData.dir) + " activeBall:" + str(_data.activeBallID))
+		print("Player at: " ,_data.playerData.pos, " facing: ",_data.playerData.dir, " activeBall:" ,_data.activeBallID, " with club: ", club)
 		stateSaved.emit(_data)
 		sceneChanged.emit(swing_scene)
 
@@ -212,9 +209,15 @@ func spawnBag(pos: Vector2):
 	bag.bagInteractorEntered.connect(_on_bag_interact_enter)
 	bag.bagInteractorExited.connect(_on_bag_interact_exit)
 	_data.playerData.bagLocation = pos
+	var bagStateData = _data.playerData.bagState
+	if bagStateData != null:
+		#setup bag from state
+		bag.setup(bagStateData)
 	add_child(bag)
 	
 func removeBag(bag: Node):
+	#store bag state in player data
+	_data.playerData.bagState = bag.bagState
 	bag.queue_free()
 
 func _on_bag_interact_enter(body: Node2D, bag: Node2D):

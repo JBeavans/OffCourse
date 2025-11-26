@@ -202,17 +202,3 @@ func solve(launchConditions: Vector2, wind = wind_speed, spin = spin_rpm0):
 	print("Rolling time (s): ", t_roll)
 	time_total = t_first_air + totalBounceTime + t_roll
 	print("Total time (s): ", time_total)
-
-	#update()  # redraw
-#
-## ---------- Draw trajectory ----------
-#func _draw():
-	#if positions.size() < 2:
-		#return
-	#for i in range(positions.size() - 1):
-		#var p0 = positions[i]
-		#var p1 = positions[i + 1]
-		#var screen_p0 = Vector2(p0.x * scale_px_per_m, -p0.y * scale_px_per_m) + origin_screen
-		#var screen_p1 = Vector2(p1.x * scale_px_per_m, -p1.y * scale_px_per_m) + origin_screen
-		#draw_line(screen_p0, screen_p1, Color(0.95, 0.85, 0.1), 2)
-	#draw_line(Vector2(0, origin_screen.y), Vector2(20000, origin_screen.y), Color(0.2, 0.6, 0.2), 2)

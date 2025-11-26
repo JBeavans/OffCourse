@@ -7,12 +7,21 @@ var openWorldScene: String = "res://Scenes/openWorld.tscn"
 
 #var _data: OpenWorldData
 @onready var ball: RigidBody2D = $ball
+@onready var club: Club = $club
 
+@export var clubID: String
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#for now we'll just remove the ball. Once there are more types, we'll instantiate the active ball's corresponding swing-view sprite (likely using an enum w/ a dict)
 	if _data.activeBallID == 0:
 		ball.queue_free()
+		
+	clubID = _data.playerData.club
+	if clubID == "empty":
+		print("no club equipped")
+		#club.queue_free()
+	else:
+		club.setClub(clubID)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

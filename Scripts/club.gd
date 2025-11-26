@@ -1,3 +1,4 @@
+class_name Club
 extends CharacterBody2D
 
 signal ballStruck
@@ -7,16 +8,29 @@ signal swingToggled
 @onready var velocity_label: Label = $"../velocityLabel"
 
 @onready var swing_sound: AudioStreamPlayer2D = $"../swingSound"
+@onready var club_sprite: Sprite2D = $ClubSprite2D
 
 #const PIX_PER_YD: float = 3.0
 const SPEED_SCALE = 0.02
-const MAX_V = 60.0 # m/s
+var max_V = 60.0 # m/s
 var x0: float
 var velX0:= 0.0
 #var zVel: float
 var launchAngle:= 12.0 #degrees
+var clubTexture
+var clubType: ClubData.ClubType
+
+func setClub(club_name: String) -> void:
+	launchAngle = ClubData.Clubs[club_name].launchAngle
+	max_V= ClubData.Clubs[club_name].ballSpeed
+	clubType = ClubData.Clubs[club_name].type
+	clubTexture = load(ClubData.Clubs[club_name].textureSource)
+	club_sprite.texture = clubTexture
+	print("club set to: " + club_name)
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	#club_sprite.texture = clubTexture
 	pass # Replace with function body.
 
 
@@ -61,7 +75,7 @@ func _physics_process(delta: float) -> void:
 		if (collision): 
 			print("club collided with " + collision.get_collider().name)
 			#TODO: create a formula that updates based on club attributes
-			var launchVelocity = min(-velocity.x/5, MAX_V)
+			var launchVelocity = min(-velocity.x/5, max_V)
 			
 			#send the launchConditions
 			ballStruck.emit(Vector2(launchVelocity, launchAngle)) #removed Pixel/yd factor since I decided to commit to working in m/s. Distance conversion should be done elsewhere.
